@@ -26,7 +26,6 @@ const useStyles = makeStyles((theme) => ({
 
 function UserForm({ user, setUsers, setUsersCount }) {
   const classes = useStyles();
-  const [userData, setUserData] = useState(user);
   const [selectedDate, setSelectedDate] = useState(
     user ? user.birth_date : new Date("1990-01-01T21:11:54")
   );
@@ -37,7 +36,6 @@ function UserForm({ user, setUsers, setUsersCount }) {
     email: user ? user.email : "",
     birth_date: selectedDate,
   });
-  const [reset, setReset] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,15 +68,6 @@ function UserForm({ user, setUsers, setUsersCount }) {
 
   const handleReset = () => {
     setSelectedDate(new Date("1990-01-01T21:11:54"));
-    setReset(true);
-    setUserData(null);
-    updateFormData({
-      first_name: "",
-      last_name: "",
-      email: "",
-      birth_date: selectedDate,
-    });
-    alert("Reset!");
     formRef.current.reset();
   };
 
@@ -100,10 +89,10 @@ function UserForm({ user, setUsers, setUsersCount }) {
               fullWidth
               id="first_name"
               label="First Name"
-              defaultValue= ""
+              defaultValue=""
               autoFocus
               onChange={handleChange}
-              value={userData?.first_name}
+              value={user?.first_name}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -114,7 +103,7 @@ function UserForm({ user, setUsers, setUsersCount }) {
               id="last_name"
               label="Last Name"
               name="last_name"
-              defaultValue={userData?.last_name}
+              defaultValue={user?.last_name}
               autoComplete="lname"
               onChange={handleChange}
             />
@@ -127,7 +116,7 @@ function UserForm({ user, setUsers, setUsersCount }) {
               id="email"
               label="Email Address"
               name="email"
-              defaultValue={userData?.email}
+              defaultValue={user?.email}
               autoComplete="email"
               onChange={handleChange}
             />
@@ -150,13 +139,17 @@ function UserForm({ user, setUsers, setUsersCount }) {
           </Grid>
         </Grid>
         <Grid container justify="center">
-          <Button
-            className={classes.button}
-            variant="contained"
-            onClick={handleReset}
-          >
-            Reset
-          </Button>
+          {!user ? (
+            <Button
+              className={classes.button}
+              variant="contained"
+              onClick={handleReset}
+            >
+              Reset
+            </Button>
+          ) : (
+            <></>
+          )}
           <Button
             className={classes.button}
             type="submit"
