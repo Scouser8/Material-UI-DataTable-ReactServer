@@ -169,6 +169,21 @@ function CustomizedDataTable() {
       setUsers(res.data);
     });
   }, []);
+  
+  useEffect(() => {
+    axios
+      .get("user/paginate", {
+        params: {
+          recordsPerPage: rowsPerPage,
+          pageNumber: page,
+          order: order,
+          orderBy: orderBy,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      });
+  }, [page]);
 
   useEffect(() => {
     axios
@@ -183,29 +198,17 @@ function CustomizedDataTable() {
       .then((res) => {
         setUsers(res.data);
       });
-  }, [page, rowsPerPage]);
+  }, [rowsPerPage]);
 
   //update the page number with new data
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-    axios
-      .get("user/paginate", {
-        params: {
-          recordsPerPage: rowsPerPage,
-          pageNumber: page,
-          order: order,
-          orderBy: orderBy,
-        },
-      })
-      .then((res) => {
-        setUsers(res.data);
-      });
+  const handleChangePage = async(event, newPage) => {
+    await setPage(newPage);
   };
 
   //update the number of records for each page with new data
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const handleChangeRowsPerPage = async(event) => {
+    await setRowsPerPage(parseInt(event.target.value, 10));
+    await setPage(0);
   };
 
   //Change the arrow label direction
