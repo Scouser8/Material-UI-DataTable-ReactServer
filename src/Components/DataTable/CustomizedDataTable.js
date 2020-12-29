@@ -200,6 +200,21 @@ function CustomizedDataTable() {
       });
   }, [rowsPerPage]);
 
+  useEffect(() => {
+    axios
+      .get("user/paginate", {
+        params: {
+          recordsPerPage: rowsPerPage,
+          pageNumber: page,
+          order: order,
+          orderBy: orderBy,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      });
+  }, [order]);
+
   //update the page number with new data
   const handleChangePage = async(event, newPage) => {
     await setPage(newPage);
