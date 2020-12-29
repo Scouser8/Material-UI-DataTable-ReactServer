@@ -1,0 +1,22 @@
+.table{
+    margin-top: 5%;
+}
+
+.table__header{
+    background-color: royalblue;
+}
+
+.table__header__cell{
+    /* color: wheat; */
+    font-weight: 550;
+    font-size: 14px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+/* 
+.table__header__cell:hover{
+    color: gold !important;
+} */
+
+.table__header__actions{
+    color: gold;
+}
