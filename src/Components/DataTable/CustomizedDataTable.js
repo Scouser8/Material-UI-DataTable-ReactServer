@@ -170,9 +170,36 @@ function CustomizedDataTable() {
     });
   }, []);
 
+  useEffect(() => {
+    axios
+      .get("user/paginate", {
+        params: {
+          recordsPerPage: rowsPerPage,
+          pageNumber: page,
+          order: order,
+          orderBy: orderBy,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      });
+  }, [page, rowsPerPage]);
+
   //update the page number with new data
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
+    axios
+      .get("user/paginate", {
+        params: {
+          recordsPerPage: rowsPerPage,
+          pageNumber: page,
+          order: order,
+          orderBy: orderBy,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      });
   };
 
   //update the number of records for each page with new data
@@ -203,7 +230,8 @@ function CustomizedDataTable() {
         },
       })
       .then((res) => {
-        alert(res.data);
+        setPage(0)
+        setUsers(res.data)
       });
   };
 
