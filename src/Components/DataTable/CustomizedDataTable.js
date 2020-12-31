@@ -159,6 +159,7 @@ function CustomizedDataTable() {
   const [openPopup, setOpenPopup] = useState(false);
   const [userToEdit, setUserToEdit] = useState("");
   const [popUpTitle, setPopUpTitle] = useState("Add New User");
+  const [searchMode, setSearchMode] = useState(false);
 
   //On the first render get user count for UX pagination purposes & their data
   useEffect(() => {
@@ -169,27 +170,29 @@ function CustomizedDataTable() {
       setUsers(res.data);
     });
   }, []);
-  
+
   useEffect(() => {
-    axios
-      .get("user/paginate", {
-        params: {
-          recordsPerPage: rowsPerPage,
-          pageNumber: page,
-          order: order,
-          orderBy: orderBy,
-        },
-      })
-      .then((res) => {
-        setUsers(res.data);
-      });
+    if (!searchMode) {
+      axios
+        .get("user/paginate", {
+          params: {
+            recordsPerPage: rowsPerPage == -1?usersCount:rowsPerPage,
+            pageNumber: page,
+            order: order,
+            orderBy: orderBy,
+          },
+        })
+        .then((res) => {
+          setUsers(res.data);
+        });
+    }
   }, [page]);
 
   useEffect(() => {
     axios
       .get("user/paginate", {
         params: {
-          recordsPerPage: rowsPerPage,
+          recordsPerPage: rowsPerPage == -1 ? usersCount : rowsPerPage,
           pageNumber: page,
           order: order,
           orderBy: orderBy,
@@ -204,7 +207,7 @@ function CustomizedDataTable() {
     axios
       .get("user/paginate", {
         params: {
-          recordsPerPage: rowsPerPage,
+          recordsPerPage: rowsPerPage == -1 ? usersCount : rowsPerPage,
           pageNumber: page,
           order: order,
           orderBy: orderBy,
@@ -216,13 +219,14 @@ function CustomizedDataTable() {
   }, [order]);
 
   //update the page number with new data
-  const handleChangePage = async(event, newPage) => {
+  const handleChangePage = async (event, newPage) => {
     await setPage(newPage);
   };
 
   //update the number of records for each page with new data
-  const handleChangeRowsPerPage = async(event) => {
-    await setRowsPerPage(parseInt(event.target.value, 10));
+  const handleChangeRowsPerPage = async (e) => {
+    const numberOfRows = e.target.value
+    await setRowsPerPage(parseInt(numberOfRows, 10));
     await setPage(0);
   };
 
@@ -236,21 +240,26 @@ function CustomizedDataTable() {
   const handleSearch = (e) => {
     const searchIndex = e.target.id;
     const valueToSearchFor = e.target.value;
-    axios
-      .get("user/filter/text", {
-        params: {
-          column: searchIndex,
-          data: valueToSearchFor,
-          recordsPerPage: rowsPerPage,
-          pageNumber: page,
-          order: order,
-          orderBy: orderBy,
-        },
-      })
-      .then((res) => {
-        setPage(0)
-        setUsers(res.data)
-      });
+    setSearchMode(true);
+    if(page !== 0){
+      setPage(0);
+    }
+      
+   axios
+     .get("user/filter/text", {
+       params: {
+         column: searchIndex,
+         data: valueToSearchFor,
+         recordsPerPage: rowsPerPage == -1 ? usersCount : rowsPerPage,
+         pageNumber: page,
+         order: order,
+         orderBy: orderBy,
+       },
+     })
+     .then((res) => {
+       setUsers(res.data);
+       setSearchMode(false);
+     });
   };
 
   // const handleDate = (date) => {
@@ -310,7 +319,7 @@ function CustomizedDataTable() {
                 <TableCell>
                   <TextField
                     id={headCell.id}
-                    label="Birthday"
+                    label={headCell.label}
                     type="date"
                     defaultValue="2017-05-24"
                     className={classes.textField}
@@ -389,9 +398,15 @@ function CustomizedDataTable() {
                 <StyledTableCell>
                   <ActionsMenu
                     user={user}
+                    setUsers={setUsers}
                     setOpenPopup={setOpenPopup}
                     setPopUpTitle={setPopUpTitle}
                     setUserToEdit={setUserToEdit}
+                    setUsersCount={setUsersCount}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    order={order}
+                    orderBy={orderBy}
                   />
                 </StyledTableCell>
               </StyledTableRow>
@@ -433,6 +448,10 @@ function CustomizedDataTable() {
           user={userToEdit}
           setUsers={setUsers}
           setUsersCount={setUsersCount}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          order={order}
+          orderBy={orderBy}
         />
       </Popup>
     </Fragment>

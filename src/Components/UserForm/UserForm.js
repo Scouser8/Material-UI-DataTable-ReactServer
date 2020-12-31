@@ -24,7 +24,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function UserForm({ user, setUsers, setUsersCount }) {
+function UserForm({
+  user,
+  setUsers,
+  setUsersCount,
+  rowsPerPage,
+  page,
+  order,
+  orderBy,
+}) {
   const classes = useStyles();
   const [selectedDate, setSelectedDate] = useState(
     user ? user.birth_date : new Date("1990-01-01T21:11:54")
@@ -57,9 +65,18 @@ function UserForm({ user, setUsers, setUsersCount }) {
           alert(res.data);
         });
     }
-    axios.get("/user").then((res) => {
-      setUsers(res.data);
-    });
+    axios
+      .get("user/paginate", {
+        params: {
+          recordsPerPage: rowsPerPage,
+          pageNumber: page,
+          order: order,
+          orderBy: orderBy,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      });
   };
 
   const handleChange = (e) => {
@@ -89,10 +106,9 @@ function UserForm({ user, setUsers, setUsersCount }) {
               fullWidth
               id="first_name"
               label="First Name"
-              defaultValue=""
+              defaultValue={user?.first_name}
               autoFocus
               onChange={handleChange}
-              value={user?.first_name}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -110,6 +126,7 @@ function UserForm({ user, setUsers, setUsersCount }) {
           </Grid>
           <Grid item xs={12}>
             <TextField
+              type="email"
               variant="outlined"
               required
               fullWidth

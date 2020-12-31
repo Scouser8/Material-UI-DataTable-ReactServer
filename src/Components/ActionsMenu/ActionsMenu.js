@@ -5,11 +5,20 @@ import MenuItem from "@material-ui/core/MenuItem";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import axios from "../../axios";
 
-const options = ["Edit", "Delete"];
-
 const ITEM_HEIGHT = 48;
 
-function ActionsMenu({ user, setOpenPopup, setPopUpTitle, setUserToEdit }) {
+function ActionsMenu({
+  user,
+  setUsers,
+  setOpenPopup,
+  setPopUpTitle,
+  setUserToEdit,
+  setUsersCount,
+  rowsPerPage,
+  page,
+  order,
+  orderBy,
+}) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -28,14 +37,27 @@ function ActionsMenu({ user, setOpenPopup, setPopUpTitle, setUserToEdit }) {
     setUserToEdit(user);
   };
 
-  const deleteUser = () => {
+  const deleteUser = async () => {
     setAnchorEl(null);
-    axios.delete(`/user/${user._id}/delete`)
-    .then(res =>{
-      alert(res.data)
-    })
+    await axios.delete(`/user/${user._id}/delete`).then((res) => {
+      alert(res.data);
+    });
+    await axios.get("/user/count").then((res) => {
+      setUsersCount(parseInt(res.data));
+    });
+    axios
+      .get("user/paginate", {
+        params: {
+          recordsPerPage: rowsPerPage,
+          pageNumber: page,
+          order: order,
+          orderBy: orderBy,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      });
   };
-
 
   return (
     <div>
@@ -60,16 +82,10 @@ function ActionsMenu({ user, setOpenPopup, setPopUpTitle, setUserToEdit }) {
           },
         }}
       >
-        <MenuItem
-          key="Edit"
-          onClick={editUser}
-        >
+        <MenuItem key="Edit" onClick={editUser}>
           Edit
         </MenuItem>
-        <MenuItem
-          key="Delete"
-          onClick={deleteUser}
-        >
+        <MenuItem key="Delete" onClick={deleteUser}>
           Delete
         </MenuItem>
       </Menu>
