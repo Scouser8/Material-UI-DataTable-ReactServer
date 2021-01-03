@@ -254,13 +254,21 @@ function CustomizedDataTable() {
         params: {
           column: searchIndex,
           data: valueToSearchFor,
-          recordsPerPage: parseInt(rowsPerPage) === -1 ? usersCount : rowsPerPage,
+          recordsPerPage:
+            parseInt(rowsPerPage) === -1 ? usersCount : rowsPerPage,
           pageNumber: page,
           order: order,
           orderBy: orderBy,
         },
       })
       .then((res) => {
+        if (valueToSearchFor === "") {
+          axios.get("/user/count").then((res) => {
+            setUsersCount(parseInt(res.data));
+          });
+        } else {
+          setUsersCount(parseInt(res.data.length));
+        }
         setUsers(res.data);
         setSearchMode(false);
       });

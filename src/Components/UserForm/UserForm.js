@@ -93,8 +93,6 @@ function UserForm({
   const handleDate = (date) => {
     setSelectedDate(date);
     const formattedDate = moment(date).format("L");
-    console.log(formattedDate);
-    console.log(typeof moment().format());
     updateFormData({
       ...formData,
       birth_date: date,

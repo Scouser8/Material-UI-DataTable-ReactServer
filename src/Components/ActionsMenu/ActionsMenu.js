@@ -39,7 +39,9 @@ function ActionsMenu({
 
   const deleteUser = async () => {
     setAnchorEl(null);
-    await axios.delete(`/user/${user._id}/delete`);
+    await axios.delete(`/user/${user._id}/delete`).then((res) => {
+      alert(res.data);
+    });
     await axios.get("/user/count").then((res) => {
       setUsersCount(parseInt(res.data));
     });
