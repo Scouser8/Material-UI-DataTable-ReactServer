@@ -31,6 +31,7 @@ import LastPageIcon from "@material-ui/icons/LastPage";
 import Popup from "../Popup/Popup";
 import UserForm from "../UserForm/UserForm";
 import ActionsMenu from "../ActionsMenu/ActionsMenu";
+import moment from "moment";
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -55,8 +56,12 @@ const headCells = [
   { id: "first_name", label: "First Name" },
   { id: "last_name", label: "Last Name" },
   { id: "email", label: "E-mail" },
-  { id: "birth_date", label: "Birth Date" },
-  { id: "created_date", label: "Created Date" },
+  { id: "birth_date", label: "Birth Date", searchField: "birth_date_display" },
+  {
+    id: "created_date",
+    label: "Created Date",
+    searchField: "created_date_display",
+  },
   { id: "actions", label: "Actions", disableSorting: true },
 ];
 
@@ -155,7 +160,6 @@ function CustomizedDataTable() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [order, setOrder] = useState("desc");
   const [orderBy, setOrderBy] = useState("created_date");
-  // const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [openPopup, setOpenPopup] = useState(false);
   const [userToEdit, setUserToEdit] = useState("");
   const [popUpTitle, setPopUpTitle] = useState("Add New User");
@@ -176,7 +180,7 @@ function CustomizedDataTable() {
       axios
         .get("user/paginate", {
           params: {
-            recordsPerPage: rowsPerPage == -1?usersCount:rowsPerPage,
+            recordsPerPage: rowsPerPage == -1 ? usersCount : rowsPerPage,
             pageNumber: page,
             order: order,
             orderBy: orderBy,
@@ -225,7 +229,7 @@ function CustomizedDataTable() {
 
   //update the number of records for each page with new data
   const handleChangeRowsPerPage = async (e) => {
-    const numberOfRows = e.target.value
+    const numberOfRows = e.target.value;
     await setRowsPerPage(parseInt(numberOfRows, 10));
     await setPage(0);
   };
@@ -239,38 +243,41 @@ function CustomizedDataTable() {
 
   const handleSearch = (e) => {
     const searchIndex = e.target.id;
-    const valueToSearchFor = e.target.value;
+    const valueToSearchFor = e.target.value.toLowerCase();
     setSearchMode(true);
-    if(page !== 0){
+    if (page !== 0) {
       setPage(0);
     }
-      
-   axios
-     .get("user/filter/text", {
-       params: {
-         column: searchIndex,
-         data: valueToSearchFor,
-         recordsPerPage: rowsPerPage == -1 ? usersCount : rowsPerPage,
-         pageNumber: page,
-         order: order,
-         orderBy: orderBy,
-       },
-     })
-     .then((res) => {
-       setUsers(res.data);
-       setSearchMode(false);
-     });
+
+    axios
+      .get("user/filter", {
+        params: {
+          column: searchIndex,
+          data: valueToSearchFor,
+          recordsPerPage: parseInt(rowsPerPage) === -1 ? usersCount : rowsPerPage,
+          pageNumber: page,
+          order: order,
+          orderBy: orderBy,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data);
+        setSearchMode(false);
+      });
   };
 
-  // const handleDate = (date) => {
-  //   setSelectedDate(date);
-  // };
-
   const dateSearch = (e) => {
-    const searchIndex = e.target.id;
-    const valueToSearchFor = e.target.value;
+    const searchIndex =
+      e.target.id === "birth_date"
+        ? "birth_date_display"
+        : "created_date_display";
+    const valueToSearchFor =
+      searchIndex === "birth_date_display"
+        ? moment(e.target.value).format("L")
+        : moment(e.target.value).format("MMM Do YYYY");
+
     axios
-      .get("user/filter/date", {
+      .get("user/filter", {
         params: {
           column: searchIndex,
           data: valueToSearchFor,
@@ -281,7 +288,7 @@ function CustomizedDataTable() {
         },
       })
       .then((res) => {
-        alert(res.data);
+        setUsers(res.data);
       });
   };
 
@@ -321,7 +328,9 @@ function CustomizedDataTable() {
                     id={headCell.id}
                     label={headCell.label}
                     type="date"
-                    defaultValue="2017-05-24"
+                    defaultValue={
+                      headCell.id === "birth_date" ? "1990-01-01" : "2021-01-01"
+                    }
                     className={classes.textField}
                     InputLabelProps={{
                       shrink: true,
@@ -373,18 +382,22 @@ function CustomizedDataTable() {
           <TableBody>
             {users?.map((user, index) => (
               <StyledTableRow key={user._id}>
-                <StyledTableCell align="left">
+                <StyledTableCell style={{ width: "5%" }} align="left">
                   {index + 1 + page * rowsPerPage}
                 </StyledTableCell>
-                <StyledTableCell align="left">
+                <StyledTableCell style={{ width: "15%" }} align="left">
                   {user.first_name}
                 </StyledTableCell>
-                <StyledTableCell align="left">{user.last_name}</StyledTableCell>
-                <StyledTableCell align="left">{user.email}</StyledTableCell>
-                <StyledTableCell align="left">
-                  {user.birth_date}
+                <StyledTableCell style={{ width: "15%" }} align="left">
+                  {user.last_name}
                 </StyledTableCell>
-                <StyledTableCell align="left">
+                <StyledTableCell style={{ width: "20%" }} align="left">
+                  {user.email}
+                </StyledTableCell>
+                <StyledTableCell style={{ width: "15%" }} align="left">
+                  {user.birth_date_display}
+                </StyledTableCell>
+                <StyledTableCell style={{ width: "15%" }} align="left">
                   {
                     /*user.created_date.toLocaleDateString("en-US", {
                       weekday: "short",
@@ -392,10 +405,10 @@ function CustomizedDataTable() {
                       month: "short",
                       day: "2-digit",
                     })*/
-                    user.created_date
+                    user.created_date_display
                   }
                 </StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ width: "5%" }} align="left">
                   <ActionsMenu
                     user={user}
                     setUsers={setUsers}

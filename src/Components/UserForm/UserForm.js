@@ -6,6 +6,7 @@ import {
   KeyboardDatePicker,
 } from "@material-ui/pickers";
 import axios from "../../axios";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -43,12 +44,13 @@ function UserForm({
     last_name: user ? user.last_name : "",
     email: user ? user.email : "",
     birth_date: selectedDate,
+    birth_date_display: moment(selectedDate).format("L"),
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
-      await axios.post("/user/add", formData).then((res) => {
+      await axios.post("/user/add", {...formData,created_date_display: moment().format("MMM Do YYYY, h:mm:ss a")}).then((res) => {
         alert(res.data);
       });
       await axios.get("/user/count").then((res) => {
@@ -80,7 +82,7 @@ function UserForm({
   };
 
   const handleChange = (e) => {
-    updateFormData({ ...formData, [e.target.name]: e.target.value });
+    updateFormData({ ...formData, [e.target.name]: e.target.value.toLowerCase() });
   };
 
   const handleReset = () => {
@@ -90,7 +92,14 @@ function UserForm({
 
   const handleDate = (date) => {
     setSelectedDate(date);
-    updateFormData({ ...formData, birth_date: date });
+    const formattedDate = moment(date).format("L");
+    console.log(formattedDate);
+    console.log(typeof moment().format());
+    updateFormData({
+      ...formData,
+      birth_date: date,
+      birth_date_display: formattedDate,
+    });
   };
 
   return (
